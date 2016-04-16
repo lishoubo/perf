@@ -8,10 +8,10 @@ import java.util.concurrent.Executors;
  */
 public abstract class OneSecondTask {
     private Executor executor;
-    private int qps;
+    private int limit;
 
-    public void start(int qps) {
-        this.qps = qps;
+    public void start(int limit) {
+        this.limit = limit;
         executor = Executors.newSingleThreadExecutor();
         executor.execute(new MyRunnable());
     }
@@ -32,7 +32,7 @@ public abstract class OneSecondTask {
                 wait = 1000 - (now - begin);
                 count++;
 
-                if (count >= qps) {
+                if (count >= limit) {
                     break;
                 }
                 if (wait <= 0) {
