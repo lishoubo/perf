@@ -1,4 +1,4 @@
-package com.personal.li.perf;
+package com.personal.li.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

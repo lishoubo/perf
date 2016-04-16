@@ -14,9 +14,9 @@
     </appender>
 
     <appender name="access" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/tmp/logs/perf/access.log</file>
+        <file>/tmp/logs/perf/client_access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/tmp/logs/perf/access.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>/tmp/logs/perf/client_access.log.%d{yyyy-MM-dd}</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>

@@ -3,7 +3,7 @@
     <property name="pattern" value="%d{HH:mm:ss.SSS} %-5level %logger{0} - %msg%n"/>
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/tmp/logs/pef/server.log</file>
+        <file>/tmp/logs/perf/server.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>/tmp/logs/perf/server.log.%d{yyyy-MM-dd}</fileNamePattern>
             <maxHistory>7</maxHistory>
@@ -14,9 +14,9 @@
     </appender>
 
     <appender name="access" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/tmp/logs/perf/access.log</file>
+        <file>/tmp/logs/perf/server_access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>/tmp/logs/perf/access.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <fileNamePattern>/tmp/logs/perf/server_access.log.%d{yyyy-MM-dd}</fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>

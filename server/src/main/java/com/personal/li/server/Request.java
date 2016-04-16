@@ -1,4 +1,4 @@
-package com.personal.li.perf.model;
+package com.personal.li.server;
 
 /**
  * Created by lishoubo on 16/4/16.

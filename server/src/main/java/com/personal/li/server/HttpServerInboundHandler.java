@@ -1,8 +1,6 @@
-package com.personal.li.perf;
+package com.personal.li.server;
 
 import com.alibaba.fastjson.JSON;
-import com.personal.li.perf.model.Request;
-import com.personal.li.perf.model.Result;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,7 +18,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
     private static Logger logger = LoggerFactory.getLogger(HttpServerInboundHandler.class);
     private static Logger access = LoggerFactory.getLogger("access");
 
-    private int mid;
+    private String mid;
     private long begin, flyTime;
 
     @Override
@@ -35,7 +33,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
                 sendResponse(ctx, -1, "not support request method.", null);
                 return;
             }
-            mid = Integer.parseInt(request.headers().get("mid"));
+            mid = request.headers().get("mid");
             begin = System.currentTimeMillis();
             long clientBegin = Long.parseLong(request.headers().get("X-begin"));
             flyTime = (System.currentTimeMillis() - clientBegin);
@@ -68,6 +66,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        response.headers().set("mid", mid);
         ctx.write(response);
         ctx.flush();
     }
