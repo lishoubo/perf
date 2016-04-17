@@ -1,11 +1,9 @@
 package com.personal.li.server;
 
 import com.alibaba.fastjson.JSON;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.*;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -19,7 +17,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
     private static Logger access = LoggerFactory.getLogger("access");
 
     private String mid;
-    private long begin, flyTime;
+    private long begin, clientBegin;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -35,8 +33,7 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
             }
             mid = request.headers().get("mid");
             begin = System.currentTimeMillis();
-            long clientBegin = Long.parseLong(request.headers().get("X-begin"));
-            flyTime = (System.currentTimeMillis() - clientBegin);
+            clientBegin = Long.parseLong(request.headers().get("X-begin"));
             return;
         }
         if (msg instanceof DefaultLastHttpContent) {
@@ -47,15 +44,14 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
                 sendResponse(ctx, -1, "error", null);
                 return;
             }
-            access.info("[server] mid:{}, fly:{}, consume:{}", mid, flyTime, (System.currentTimeMillis() - begin));
+            access.info("[server] mid:{}, consume:{}", mid, (System.currentTimeMillis() - begin));
         }
     }
 
     private void handleRequest(ChannelHandlerContext ctx, DefaultLastHttpContent msg) {
         DefaultLastHttpContent httpContent = msg;
-        ByteBuf decode = Base64.decode(httpContent.content());
-        byte[] bytes = new byte[decode.readableBytes()];
-        decode.readBytes(bytes);
+        byte[] bytes = new byte[httpContent.content().readableBytes()];
+        httpContent.content().readBytes(bytes);
         String md5 = DigestUtils.md5Hex(bytes);
         sendResponse(ctx, 0, null, md5);
     }
@@ -67,6 +63,8 @@ public class HttpServerInboundHandler extends ChannelInboundHandlerAdapter {
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, response.content().readableBytes());
         response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
         response.headers().set("mid", mid);
+        response.headers().set("X-Client-Begin", clientBegin);
+        response.headers().set("X-Server-cost", (System.currentTimeMillis() - begin));
         ctx.write(response);
         ctx.flush();
     }

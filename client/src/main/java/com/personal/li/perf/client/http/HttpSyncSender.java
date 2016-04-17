@@ -40,7 +40,7 @@ public class HttpSyncSender implements Sender {
         long begin = System.currentTimeMillis();
         String mid = MidGenerator.nextMid();
         try {
-            httpURLConnection = doSend(mid);
+            httpURLConnection = doSend(mid, begin);
             monitor.recordQps();
         } catch (Exception e) {
             logger.error("[client]", e);
@@ -52,9 +52,15 @@ public class HttpSyncSender implements Sender {
             logger.error("[client]", e);
             monitor.recordError();
         }
-        long duration = System.currentTimeMillis() - begin;
-        access.info("[client] mid:{}, duration:{}", mid, duration);
-        monitor.recordTps(duration);
+
+        long now = System.currentTimeMillis();
+        long duration = now - begin;
+        long beginFromServer = Long.parseLong(httpURLConnection.getHeaderField("X-Client-Begin"));
+        long serverCost = Long.parseLong(httpURLConnection.getHeaderField("X-Server-cost"));
+        long durationFromServer = now - beginFromServer;
+        logger.info("[client] mid:{}, duration:{}, durationFromServer:{}, serverCost:{}",
+                mid, duration, durationFromServer, serverCost);
+        monitor.recordTps(durationFromServer);
     }
 
     private void parseResult(HttpURLConnection connection) throws IOException {
@@ -66,10 +72,10 @@ public class HttpSyncSender implements Sender {
         IOUtils.closeQuietly(inputStream);
     }
 
-    private HttpURLConnection doSend(String mid) throws IOException {
+    private HttpURLConnection doSend(String mid, long begin) throws IOException {
         URL realUrl = new URL(request.getUrl());
         HttpURLConnection connection = open(realUrl);
-        setHeaders(connection, mid);
+        setHeaders(connection, mid, begin);
 
         connection.setDoInput(true);
 
@@ -91,10 +97,10 @@ public class HttpSyncSender implements Sender {
         return connection;
     }
 
-    private void setHeaders(HttpURLConnection connection, String mid) {
+    private void setHeaders(HttpURLConnection connection, String mid, long begin) {
         connection.setRequestProperty("Content-type", "application/json");
         connection.setRequestProperty("mid", mid);
-        connection.setRequestProperty("X-begin", String.valueOf(System.currentTimeMillis()));
+        connection.setRequestProperty("X-begin", String.valueOf(begin));
     }
 
     private void sendBody(HttpURLConnection connection, Request request) throws IOException {
