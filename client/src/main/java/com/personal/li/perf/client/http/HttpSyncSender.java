@@ -47,6 +47,7 @@ public class HttpSyncSender implements Sender {
             logger.error("[client]", e);
             return;
         }
+        long middle = System.currentTimeMillis();
         try {
             parseResult(httpURLConnection);
         } catch (IOException e) {
@@ -59,8 +60,8 @@ public class HttpSyncSender implements Sender {
         long beginFromServer = Long.parseLong(httpURLConnection.getHeaderField("X-Client-Begin"));
         long serverCost = Long.parseLong(httpURLConnection.getHeaderField("X-Server-cost"));
         long durationFromServer = now - beginFromServer;
-        logger.info("[client] mid:{}, duration:{}, durationFromServer:{}, serverCost:{}",
-                mid, duration, durationFromServer, serverCost);
+        logger.info("[client] mid:{}, duration:{}, durationFromServer:{}, serverCost:{}. middle:{}",
+                mid, duration, durationFromServer, serverCost, (middle - begin));
         monitor.recordTps(durationFromServer);
     }
 
