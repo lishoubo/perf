@@ -12,7 +12,7 @@ public class Client {
         monitor.start(1);
 
         Request request = new Request();
-        request.setUrl("http://172.16.33.140:8080");
+        request.setUrl("http://" + args[0] + ":" + args[1]);
         request.setMethod("POST");
         request.setBody("lishoubo".getBytes());
 
