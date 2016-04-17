@@ -34,12 +34,16 @@ public class Monitor extends OneSecondTask {
     public void recordTps(long duration) {
         tps.incrementAndGet();
         total.incrementAndGet();
-        time.set(duration);
+        time.addAndGet(duration);
     }
 
     public void recordError() {
         error.incrementAndGet();
         total.incrementAndGet();
+    }
+
+    public void send(String mid) {
+
     }
 
     @Override

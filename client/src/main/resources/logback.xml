@@ -13,6 +13,17 @@
         </encoder>
     </appender>
 
+    <appender name="task" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/tmp/logs/perf/task.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/tmp/logs/perf/task.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+    </appender>
+
     <appender name="access" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>/tmp/logs/perf/client_access.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -26,6 +37,10 @@
 
     <logger name="access" level="INFO" additivity="false">
         <appender-ref ref="access"/>
+    </logger>
+
+    <logger name="task" level="INFO" additivity="false">
+        <appender-ref ref="task"/>
     </logger>
 
     <root level="info">

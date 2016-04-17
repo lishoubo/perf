@@ -1,5 +1,8 @@
 package com.personal.li.perf.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -9,6 +12,7 @@ import java.util.concurrent.Executors;
 public abstract class OneSecondTask {
     private Executor executor;
     private int limit;
+    private static Logger task = LoggerFactory.getLogger("task");
 
     public void start(int limit) {
         this.limit = limit;
@@ -46,6 +50,7 @@ public abstract class OneSecondTask {
                     e.printStackTrace();
                 }
             }
+            task.info("[task] limit:{}, execute:{}, wait:{}", limit, count, wait);
             executor.execute(this);
         }
     }

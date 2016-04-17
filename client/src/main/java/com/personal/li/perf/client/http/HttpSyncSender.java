@@ -39,6 +39,7 @@ public class HttpSyncSender implements Sender {
         HttpURLConnection httpURLConnection;
         long begin = System.currentTimeMillis();
         String mid = MidGenerator.nextMid();
+        monitor.send(mid);
         try {
             httpURLConnection = doSend(mid, begin);
             monitor.recordQps();
