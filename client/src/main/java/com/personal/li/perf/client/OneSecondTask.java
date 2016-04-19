@@ -31,8 +31,12 @@ public abstract class OneSecondTask {
 
 
             while (true) {
+                long jobBegin = System.nanoTime();
                 doJob();
                 long now = System.currentTimeMillis();
+
+                task.info("[task][job] duration:{}", (System.nanoTime() - jobBegin));
+
                 wait = 1000 - (now - begin);
                 count++;
 

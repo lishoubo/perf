@@ -1,6 +1,5 @@
 package com.personal.li.perf.client.http;
 
-import com.personal.li.perf.client.MidGenerator;
 import com.personal.li.perf.client.Monitor;
 import com.personal.li.perf.client.Sender;
 import com.personal.li.perf.client.model.Request;
@@ -26,7 +25,7 @@ public class HttpSyncSender implements Sender {
 
     static {
         System.setProperty("http.keepAlive", "true");
-        System.setProperty("http.maxConnections", "100");
+        System.setProperty("http.maxConnections", "200");
     }
 
     public HttpSyncSender(Monitor monitor, Request request) {
@@ -38,16 +37,13 @@ public class HttpSyncSender implements Sender {
     public void send() {
         HttpURLConnection httpURLConnection;
         long begin = System.currentTimeMillis();
-        String mid = MidGenerator.nextMid();
-        monitor.send(mid);
         try {
-            httpURLConnection = doSend(mid, begin);
+            httpURLConnection = doSend();
             monitor.recordQps();
         } catch (Exception e) {
             logger.error("[client]", e);
             return;
         }
-        long middle = System.currentTimeMillis();
         try {
             parseResult(httpURLConnection);
         } catch (IOException e) {
@@ -57,12 +53,7 @@ public class HttpSyncSender implements Sender {
 
         long now = System.currentTimeMillis();
         long duration = now - begin;
-        long beginFromServer = Long.parseLong(httpURLConnection.getHeaderField("X-Client-Begin"));
-        long serverCost = Long.parseLong(httpURLConnection.getHeaderField("X-Server-cost"));
-        long durationFromServer = now - beginFromServer;
-        logger.info("[client] mid:{}, duration:{}, durationFromServer:{}, serverCost:{}. middle:{}",
-                mid, duration, durationFromServer, serverCost, (middle - begin));
-        monitor.recordTps(durationFromServer);
+        monitor.recordTps(duration);
     }
 
     private void parseResult(HttpURLConnection connection) throws IOException {
@@ -71,13 +62,15 @@ public class HttpSyncSender implements Sender {
             monitor.recordError();
         }
         InputStream inputStream = connection.getInputStream();
+        IOUtils.toByteArray(inputStream);
         IOUtils.closeQuietly(inputStream);
+        IOUtils.closeQuietly(connection.getErrorStream());
     }
 
-    private HttpURLConnection doSend(String mid, long begin) throws IOException {
+    private HttpURLConnection doSend() throws IOException {
         URL realUrl = new URL(request.getUrl());
         HttpURLConnection connection = open(realUrl);
-        setHeaders(connection, mid, begin);
+        setHeaders(connection);
 
         connection.setDoInput(true);
 
@@ -99,10 +92,8 @@ public class HttpSyncSender implements Sender {
         return connection;
     }
 
-    private void setHeaders(HttpURLConnection connection, String mid, long begin) {
+    private void setHeaders(HttpURLConnection connection) {
         connection.setRequestProperty("Content-type", "application/json");
-        connection.setRequestProperty("mid", mid);
-        connection.setRequestProperty("X-begin", String.valueOf(begin));
     }
 
     private void sendBody(HttpURLConnection connection, Request request) throws IOException {

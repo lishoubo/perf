@@ -8,6 +8,14 @@ public class Response<T> {
     private String message;
     private T data;
 
+    public static <T> Response<T> build(int code, String message, T data) {
+        Response<T> tResponse = new Response<>();
+        tResponse.code = code;
+        tResponse.message = message;
+        tResponse.data = data;
+        return tResponse;
+    }
+
     public int getCode() {
         return code;
     }
