@@ -16,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.pool.PoolStats;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,9 @@ public class PerfHttpClient {
     private PoolingHttpClientConnectionManager connectionManager = null;
     private HttpClientBuilder clientBuilder = null;
 
-    private int TIMEOUT = 3000;
+    private int TIMEOUT = 500;
     private int MAX_CONNECTION = 3000;
-    private int MAX_HOST_CONNECTION = 200;
+    private int MAX_HOST_CONNECTION = 2000;
 
     public static PerfHttpClient instance() {
         return Holder.INSTANCE;
@@ -108,13 +109,7 @@ public class PerfHttpClient {
     }
 
     private Response parse(CloseableHttpResponse httpResponse) throws IOException {
-        int status = httpResponse.getStatusLine().getStatusCode();
-        if (status >= 400) {
-            return Response.build(-1, null, null);
-        }
-        InputStream inputStream = httpResponse.getEntity().getContent();
-        IOUtils.toByteArray(inputStream);
-        IOUtils.closeQuietly(inputStream);
+        EntityUtils.consumeQuietly(httpResponse.getEntity());
         return Response.build(0, null, null);
     }
 
